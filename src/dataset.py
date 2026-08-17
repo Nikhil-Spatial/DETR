@@ -28,11 +28,11 @@ class ImageDataset(Dataset):
         # group - all ground truth bounded objects in a single image
         group = self.groups.get_group(img_filename).drop(columns=["filename"])
 
-        target_tensor = torch.tensor([])
+        target_list = []
         for _, row in group.iterrows():
-            torch.cat((target_tensor, torch.tensor(row)), dim=0)
+            target_list.append(list(row))
 
-        return target_tensor
+        return torch.tensor(target_list)
 
     def __getitem__(self, index):
         img_filename = self.img_filenames[index]
