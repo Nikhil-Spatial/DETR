@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from configs import IMAGE_WIDTH, IMAGE_HEIGHT
+from configs import IMAGE_WIDTH, IMAGE_HEIGHT, CLASS_TO_IDX
 from pathlib import Path
 from PIL import Image
 import csv
@@ -21,29 +21,33 @@ def parse_xml(xml_path, writer):
 
     for obj in root.findall("object"):
         class_name = obj.find("name").text
+        class_idx = CLASS_TO_IDX[class_name]
 
-        # parse bounding box coordinates and scale them
+        # parse bounding box coordinates and scale them to align with the
+        # resized image width and height
         bndbox = obj.find("bndbox")
         xmin = int(bndbox.find("xmin").text) * img_width_ratio
         ymin = int(bndbox.find("ymin").text) * img_height_ratio
         xmax = int(bndbox.find("xmax").text) * img_width_ratio
         ymax = int(bndbox.find("ymax").text) * img_height_ratio
 
-        # convert (xmin, ymin, xmax, ymax) to (x, y, w, h) format
-        x = int(round((xmin+xmax)/2))
-        y = int(round((ymin+ymax)/2))
-        w = int(round(xmax-xmin))
-        h = int(round(ymax-ymin))
+        # 1) convert (xmin, ymin, xmax, ymax) to (x, y, w, h) format
+        # 2) normalize all values with respect to the resized images' width and
+        # height
+        x = int(round((xmin+xmax)/2)) / IMAGE_WIDTH
+        y = int(round((ymin+ymax)/2)) / IMAGE_HEIGHT
+        w = int(round(xmax-xmin)) / IMAGE_WIDTH
+        h = int(round(ymax-ymin)) / IMAGE_HEIGHT
 
         # write to annotations.csv file
-        writer.writerow([filename, class_name, x, y, w, h])
+        writer.writerow([filename, class_idx, x, y, w, h])
 
 # write to csv annotations files
 def write_csv(output_dir, annot_dir):
     with open (output_dir / "annotations.csv", "w", newline="") as csv_file:
         writer = csv.writer(csv_file, delimiter=",")
 
-        writer.writerow(["filename", "class_name", "x", "y", "w", "h"])
+        writer.writerow(["filename", "class_idx", "x", "y", "w", "h"])
 
         for annot_path in annot_dir.glob("*.xml"):
             parse_xml(annot_path, writer)
@@ -63,8 +67,7 @@ def process_images(img_dir, output_img_dir):
 # 2) raw image dimensions -> resize to 224x224
 def preprocess():
     # create data directory
-    data_dir = Path("../data")
-    data_dir.mkdir(parents=True, exist_ok=True)
+    data_dir = Path("../data").mkdir(parents=True, exist_ok=True)
 
     # move trainval and test dataset directories into data directory
     trainval_dir = Path("../VOCtrainval_06-Nov-2007")
@@ -81,17 +84,6 @@ def preprocess():
         "../data/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/Annotations"
     )
 
-    # create the trainval and test output directories
-    trainval_output_dir = Path("../data/preprocessed/trainval")
-    test_output_dir = Path("../data/preprocessed/test")
-
-    trainval_output_dir.mkdir(parents=True, exist_ok=True)
-    test_output_dir.mkdir(parents=True, exist_ok=True)
-
-    # write the annotations.csv file to the respective output directory
-    write_csv(trainval_output_dir, trainval_annot_dir)
-    write_csv(test_output_dir, test_annot_dir)
-
     # store the raw trainval and test image directories
     trainval_img_dir = Path(
         "../data/VOCtrainval_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages"
@@ -100,17 +92,22 @@ def preprocess():
         "../data/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages"
     )
 
-    # create the output image directories
-    trainval_output_img_dir = Path("../data/preprocessed/trainval/images")
-    test_output_img_dir = Path("../data/preprocessed/test/images")
+    # create the trainval and test output directories
+    trainval_output_dir = Path("../data/preprocessed/trainval/images").mkdir(
+        parents=True, exist_ok=True
+    )
+    test_output_dir = Path("../data/preprocessed/test/images").mkdir(
+        parents=True, exist_ok=True
+    )
 
-    trainval_output_img_dir.mkdir(parents=True, exist_ok=True)
-    test_output_img_dir.mkdir(parents=True, exist_ok=True)
+    # write the annotations.csv file to the respective output directory
+    write_csv(trainval_output_dir.parent, trainval_annot_dir)
+    write_csv(test_output_dir.parent, test_annot_dir)
 
     # process the images and store them in their respective output image
     # directories
-    process_images(trainval_img_dir, trainval_output_img_dir)
-    process_images(test_img_dir, test_output_img_dir)
+    process_images(trainval_img_dir, trainval_output_dir)
+    process_images(test_img_dir, test_output_dir)
 
 if __name__ == "__main__":
     preprocess()
