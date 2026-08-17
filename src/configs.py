@@ -1,4 +1,4 @@
-# width and height of image
+# width and height of the resized images
 IMAGE_WIDTH = 224
 IMAGE_HEIGHT = 224
 
