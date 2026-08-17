@@ -38,3 +38,6 @@ IDX_TO_CLASS = {
 
 # size of batches in DataLoader
 BATCH_SIZE = 32
+
+# embedded dimensions
+D = 256
