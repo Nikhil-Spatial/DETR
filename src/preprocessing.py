@@ -75,10 +75,10 @@ def preprocess():
 
     # store the raw trainval and test annotations directories
     trainval_annot_dir = Path(
-        "../data/VOCtrainval-2007/VOCdevkit/VOC2007/Annotations"
+        "../data/VOCtrainval_06-Nov-2007/VOCdevkit/VOC2007/Annotations"
     )
     test_annot_dir = Path(
-        "../data/VOCtest-2007/VOCdevkit/VOC2007/Annotations"
+        "../data/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/Annotations"
     )
 
     # create the trainval and test output directories
@@ -94,9 +94,11 @@ def preprocess():
 
     # store the raw trainval and test image directories
     trainval_img_dir = Path(
-        "../data/VOCtrainval-2007/VOCdevkit/VOC2007/JPEGImages"
+        "../data/VOCtrainval_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages"
     )
-    test_img_dir = Path("../data/VOCtest-2007/VOCdevkit/VOC2007/JPEGImages")
+    test_img_dir = Path(
+        "../data/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages"
+    )
 
     # create the output image directories
     trainval_output_img_dir = Path("../data/preprocessed/trainval/images")
@@ -107,7 +109,6 @@ def preprocess():
 
     # process the images and store them in their respective output image
     # directories
-
     process_images(trainval_img_dir, trainval_output_img_dir)
     process_images(test_img_dir, test_output_img_dir)
 
