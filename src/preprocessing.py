@@ -53,61 +53,45 @@ def write_csv(output_dir, annot_dir):
             parse_xml(annot_path, writer)
 
 # resize image dimensions to 224x224
-def process_images(img_dir, output_img_dir):
+def process_images(output_dir, img_dir):
     for img_path in img_dir.glob("*.jpg"):
-        output_img_path = output_img_dir / img_path.name
+        output_path = output_dir / img_path.name
 
         with Image.open(img_path) as img:
             processed_img = img.convert("RGB").resize(
                 (IMAGE_WIDTH, IMAGE_HEIGHT)
             )
-            processed_img.save(output_img_path)
+            processed_img.save(output_path)
 
 # 1) raw annotations -> structure annotations.csv file
 # 2) raw image dimensions -> resize to 224x224
 def preprocess():
     # create data directory
-    data_dir = Path("../data").mkdir(parents=True, exist_ok=True)
+    data_dir = Path("../data")
+    data_dir.mkdir(parents=True, exist_ok=True)
 
     # move trainval and test dataset directories into data directory
     trainval_dir = Path("../VOCtrainval_06-Nov-2007")
     test_dir = Path("../VOCtest_06-Nov-2007")
 
-    trainval_dir.rename(data_dir / trainval_dir.name)
-    test_dir.rename(data_dir / test_dir.name)
-
-    # store the raw trainval and test annotations directories
-    trainval_annot_dir = Path(
-        "../data/VOCtrainval_06-Nov-2007/VOCdevkit/VOC2007/Annotations"
-    )
-    test_annot_dir = Path(
-        "../data/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/Annotations"
-    )
-
-    # store the raw trainval and test image directories
-    trainval_img_dir = Path(
-        "../data/VOCtrainval_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages"
-    )
-    test_img_dir = Path(
-        "../data/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/JPEGImages"
-    )
+    trainval_dir.rename(data_dir / trainval_dir.name / "VOCdevkit/VOC2007")
+    test_dir.rename(data_dir / test_dir.name / "VOCdevkit/VOC2007")
 
     # create the trainval and test output directories
-    trainval_output_dir = Path("../data/preprocessed/trainval/images").mkdir(
-        parents=True, exist_ok=True
-    )
-    test_output_dir = Path("../data/preprocessed/test/images").mkdir(
-        parents=True, exist_ok=True
-    )
+    trainval_output_dir = Path("../data/preprocessed/trainval/images")
+    trainval_output_dir.mkdir(parents=True, exist_ok=True)
+
+    test_output_dir = Path("../data/preprocessed/test/images")
+    test_output_dir.mkdir(parents=True, exist_ok=True)
 
     # write the annotations.csv file to the respective output directory
-    write_csv(trainval_output_dir.parent, trainval_annot_dir)
-    write_csv(test_output_dir.parent, test_annot_dir)
+    write_csv(trainval_output_dir.parent, trainval_dir / "Annotations")
+    write_csv(test_output_dir.parent, test_dir / "Annotations")
 
     # process the images and store them in their respective output image
     # directories
-    process_images(trainval_img_dir, trainval_output_dir)
-    process_images(test_img_dir, test_output_dir)
+    process_images(trainval_output_dir, trainval_dir / "JPEGImages")
+    process_images(test_output_dir, test_dir / "JPEGImages")
 
 if __name__ == "__main__":
     preprocess()
