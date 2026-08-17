@@ -74,8 +74,12 @@ def preprocess():
     trainval_dir = Path("../VOCtrainval_06-Nov-2007")
     test_dir = Path("../VOCtest_06-Nov-2007")
 
-    trainval_dir.rename(data_dir / trainval_dir.name / "VOCdevkit/VOC2007")
-    test_dir.rename(data_dir / test_dir.name / "VOCdevkit/VOC2007")
+    trainval_dir.rename(data_dir / trainval_dir.name)
+    test_dir.rename(data_dir / test_dir.name)
+
+    # update trainval and test directory paths
+    trainval_dir = Path("../data/VOCtrainval_06-Nov-2007/VOCdevkit/VOC2007/")
+    test_dir = Path("../data/VOCtest_06-Nov-2007/VOCdevkit/VOC2007/")
 
     # create the trainval and test output directories
     trainval_output_dir = Path("../data/preprocessed/trainval/images")
