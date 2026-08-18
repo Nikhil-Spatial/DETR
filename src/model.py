@@ -1,4 +1,5 @@
 from torchvision.models import resnet18
+from transformer_layers import positional_encodings
 from configs import D, H, W
 import torch.nn as nn
 import torch
@@ -16,13 +17,16 @@ class Model(nn.Module):
         # project channels to configured embedded dimensions
         self.projection = nn.Conv2d(512, D, kernel_size=1)
 
-        #
+        # store positional encodings
+        self.pos_encodings = positional_encodings().unsqueeze(0)
 
     def forward(self, x):
         batch_size = x.shape[0]
 
         x = self.projection(self.backbone(x))
-        return x.reshape(batch_size, D, H*W).transpose(-2, -1)
+        x = x.reshape(batch_size, D, H*W).transpose(-2, -1)
+        x += self.pos_encodings
+        return x
 
 inputs = torch.randn(32, 3, 224, 224)
 model = Model()
