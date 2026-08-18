@@ -41,3 +41,7 @@ BATCH_SIZE = 32
 
 # embedded dimensions
 D = 256
+
+# height/width of feature maps output by backbone
+H = 7
+W = 7
