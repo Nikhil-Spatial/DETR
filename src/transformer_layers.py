@@ -42,6 +42,7 @@ class MultiHeadAttention(nn.Module):
 
         # apply linear transformation to vertically concatenated head outputs
         self.output_linear_transform = nn.Linear(D, D, bias=False)
+        self.dropout = nn.Dropout(dropout_p)
 
     def forward(self, x_q, x_k, x_v):
         # compute head outputs
@@ -52,21 +53,18 @@ class MultiHeadAttention(nn.Module):
         output = torch.cat(head_outputs, dim=-1)
 
         # apply linear transformation
-        return self.output_linear_transform(output)
+        return self.dropout(self.output_linear_transform(output))
 
 class FFN(nn.Module):
     def __init__(self):
         super().__init__()
 
         self.affine_transform_1 = nn.Linear(D, D)
-        self.dropout_1 = nn.Dropout(dropout_p)
-
         self.affine_transform_2 = nn.Linear(D, D)
-        self.dropout_2 = nn.Dropout(dropout_p)
+        self.dropout = nn.Dropout(dropout_p)
 
     def forward(self, x):
-        # affine transform -> dropout -> ReLU activation -> affine transform
-        # -> dropout
-        x = F.relu(self.dropout_1(self.affine_transform_1(x)))
+        # affine transform -> ReLU activation -> affine transform -> dropout
+        x = F.relu(self.affine_transform_1(x))
 
-        return self.dropout_2(self.affine_transform_2(x))
+        return self.dropout(self.affine_transform_2(x))
