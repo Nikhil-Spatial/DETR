@@ -54,3 +54,6 @@ HEADS = 4
 
 # backbone output channels
 BB_CHANNELS = 512
+
+# number of layers in transformer encoder
+ENCODER_LAYERS = 6

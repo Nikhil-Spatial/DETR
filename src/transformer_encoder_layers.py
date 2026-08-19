@@ -1,4 +1,4 @@
-from configs import D, H, W, HEADS, BB_CHANNELS, dropout_p
+from configs import D, H, W, HEADS, BB_CHANNELS, dropout_p, ENCODER_LAYERS
 import torch.nn.functional as F
 from torch import sin, cos
 from torch import nn
@@ -80,17 +80,18 @@ class FFN(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.conv_1 = nn.Conv2d(D, BB_CHANNELS)
+        self.affine_transform_1 = nn.Linear(D, D)
         self.dropout_1 = nn.Dropout(dropout_p)
 
-        self.conv_2 = nn.Conv2d(BB_CHANNELS, D)
+        self.affine_transform_2 = nn.Linear(D, D)
         self.dropout_2 = nn.Dropout(dropout_p)
 
     def forward(self, x):
-        # convolution -> dropout -> ReLU activation -> convolution -> dropout
-        x = F.relu(self.dropout_1(self.conv_1(x)))
+        # affine transform -> dropout -> ReLU activation -> affine transform
+        # -> dropout
+        x = F.relu(self.dropout_1(self.affine_transform_1(x)))
 
-        return self.dropout_2(self.conv_2(x))
+        return self.dropout_2(self.affine_transform_2(x))
 
 class TransformerEncoderLayer(nn.Module):
     def __init__(self):
@@ -115,3 +116,18 @@ class TransformerEncoderLayer(nn.Module):
         x = self.ffn(x) + x
 
         return self.layer_norm_2(x)
+
+class TransformerEncoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # module list of transformer layers
+        self.transformer_encoder_layers = nn.ModuleList(
+            [TransformerEncoderLayer() for _ in range(ENCODER_LAYERS)]
+        )
+    def forward(self, x):
+        # feed patch embeddings to the transformer layers
+        for transformer_encoder_layer in self.transformer_encoder_layers:
+            x = transformer_encoder_layer(x)
+
+        return x

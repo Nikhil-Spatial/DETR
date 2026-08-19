@@ -1,5 +1,5 @@
 from torchvision.models import resnet18
-from transformer_encoder_layers import positional_encoding
+from transformer_encoder_layers import positional_encoding, TransformerEncoder
 from configs import D, H, W, dropout_p, BB_CHANNELS
 from torch import nn
 import torch
@@ -23,6 +23,9 @@ class Model(nn.Module):
         self.register_buffer("pos_encoding", pos_encoding)
         self.dropout = nn.Dropout(dropout_p)
 
+        # transformer encoder
+        self.transformer_encoder = TransformerEncoder()
+
     def forward(self, x):
         batch_size = x.shape[0]
 
@@ -35,6 +38,9 @@ class Model(nn.Module):
 
         # add positional encoding to feature maps
         x = self.dropout(x + self.pos_encoding)
+
+        # feed feature embeddings to transformer encoder
+        x = self.transformer_encoder(x)
 
         return x
 
