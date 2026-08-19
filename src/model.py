@@ -25,9 +25,6 @@ class Model(nn.Module):
         # transformer encoder
         self.transformer_encoder = TransformerEncoder()
 
-        # object queries
-        self.object_queries = nn.Parameter(torch.randn(N, D))
-
     def forward(self, x):
         batch_size = x.shape[0]
 
