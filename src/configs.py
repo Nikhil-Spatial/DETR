@@ -59,5 +59,8 @@ BB_CHANNELS = 512
 # number of layers in transformer encoder
 ENCODER_LAYERS = 6
 
+# number of layers in transformer decoder
+DECODER_LAYERS = 6
+
 # number of object queries/prediction slots
 N = 100
