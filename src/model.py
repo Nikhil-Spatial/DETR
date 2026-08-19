@@ -25,6 +25,9 @@ class Model(nn.Module):
         # transformer encoder
         self.transformer_encoder = TransformerEncoder()
 
+        # learnable positional object query embeddings
+        self.query_pos = nn.Parameter(torch.randn(N, D))
+
     def forward(self, x):
         batch_size = x.shape[0]
 
