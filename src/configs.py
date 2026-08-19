@@ -48,3 +48,6 @@ W = 7
 
 # probability of dropout layer
 dropout_p = 0.0
+
+# number of heads in the multi-head self-attention layer
+HEADS = 4

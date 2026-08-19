@@ -1,5 +1,7 @@
-from configs import D, H, W
+from configs import D, H, W, HEADS
+import torch.nn.functional as F
 from torch import sin, cos
+from torch import nn
 import torch
 
 def positional_encoding():
@@ -23,3 +25,30 @@ def positional_encoding():
 
     return pos_encodings.reshape(H*W, D)
 
+class SelfAttentionHead(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # dimensions of each token in the query, key, and value tensors
+        self.D_qkv = torch.tensor(D // HEADS)
+
+        # Q, K, and V transformations are purely linear
+        self.Q_linear_transform = nn.Linear(D, self.D_qkv, bias=False)
+        self.K_linear_transform = nn.Linear(D, self.D_qkv, bias=False)
+        self.V_linear_transform = nn.Linear(D, self.D_qkv, bias=False)
+
+    def forward(self, x):
+        # query, key, and value tensors
+        Q = self.Q_linear_transform(x)
+        K = self.K_linear_transform(x)
+        V = self.V_linear_transform(x)
+
+        # compute attention scores:
+        # softmax(matmul(Q, transpose(K)) / sqrt(D_qkv))
+        attention_scores = F.softmax(
+            (Q @ K.transpose(-2, -1)) / self.D_qkv.sqrt(),
+            dim=-1
+        )
+
+        # compute head output
+        return attention_scores @ V

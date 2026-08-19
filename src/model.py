@@ -1,7 +1,7 @@
 from torchvision.models import resnet18
 from transformer_layers import positional_encoding
 from configs import D, H, W, dropout_p
-import torch.nn as nn
+from torch import nn
 import torch
 
 class Model(nn.Module):
