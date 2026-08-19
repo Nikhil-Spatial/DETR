@@ -45,3 +45,6 @@ D = 256
 # height/width of feature maps output by backbone
 H = 7
 W = 7
+
+# probability of dropout layer
+dropout_p = 0.0
