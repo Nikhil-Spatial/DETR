@@ -20,8 +20,8 @@ def positional_encoding():
                 pos_encodings[pos_y][pos_x][2*i] = sin(argument_y)
                 pos_encodings[pos_y][pos_x][2*i+1] = cos(argument_y)
 
-                pos_encodings[pos_y][pos_x][(2*i)+128] = sin(argument_x)
-                pos_encodings[pos_y][pos_x][(2*i+1)+128] = cos(argument_x)
+                pos_encodings[pos_y][pos_x][(2*i)+(D//2)] = sin(argument_x)
+                pos_encodings[pos_y][pos_x][(2*i+1)+(D//2)] = cos(argument_x)
 
     return pos_encodings.reshape(H*W, D)
 
@@ -33,15 +33,15 @@ class TransformerEncoderLayer(nn.Module):
         self.layer_norm_1 = nn.LayerNorm(D)
         self.layer_norm_2 = nn.LayerNorm(D)
 
-        # multi-head attention layer
-        self.multi_head_attention = MultiHeadAttention()
+        # multi-head attention (MHA) layer
+        self.mha = MultiHeadAttention()
 
         # feed-forward network (FFN)
         self.ffn = FFN()
 
-    def forward(self, x):
+    def forward(self, x, pos_encoding):
         # multi-head attention residual connection -> layer normalize
-        x = self.multi_head_attention(x, x) + x
+        x = self.mha(x + pos_encoding, x + pos_encoding, x) + x
         x = self.layer_norm_1(x)
 
         # ffn residual connection -> layer normalize
@@ -57,9 +57,9 @@ class TransformerEncoder(nn.Module):
         self.transformer_encoder_layers = nn.ModuleList(
             [TransformerEncoderLayer() for _ in range(ENCODER_LAYERS)]
         )
-    def forward(self, x):
+    def forward(self, x, pos_encoding):
         # feed patch embeddings to the transformer layers
         for transformer_encoder_layer in self.transformer_encoder_layers:
-            x = transformer_encoder_layer(x)
+            x = transformer_encoder_layer(x, pos_encoding)
 
         return x

@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch import nn
 import torch
 
-class SelfAttentionHead(nn.Module):
+class AttentionHead(nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -15,11 +15,11 @@ class SelfAttentionHead(nn.Module):
         self.K_linear_transform = nn.Linear(D, self.D_qkv, bias=False)
         self.V_linear_transform = nn.Linear(D, self.D_qkv, bias=False)
 
-    def forward(self, x_q, x_kv):
+    def forward(self, x_q, x_k, x_v):
         # query, key, and value tensors
         Q = self.Q_linear_transform(x_q)
-        K = self.K_linear_transform(x_kv)
-        V = self.V_linear_transform(x_kv)
+        K = self.K_linear_transform(x_k)
+        V = self.V_linear_transform(x_v)
 
         # compute attention scores:
         # softmax(matmul(Q, transpose(K)) / sqrt(D_qkv))
@@ -35,18 +35,18 @@ class MultiHeadAttention(nn.Module):
     def __init__(self):
         super().__init__()
 
-        # list of self-attention heads
-        self.self_attention_heads = nn.ModuleList(
-            [SelfAttentionHead() for _ in range(HEADS)]
+        # list of attention heads
+        self.attention_heads = nn.ModuleList(
+            [AttentionHead() for _ in range(HEADS)]
         )
 
         # apply linear transformation to vertically concatenated head outputs
         self.output_linear_transform = nn.Linear(D, D, bias=False)
 
-    def forward(self, x_q, x_kv):
+    def forward(self, x_q, x_k, x_v):
         # compute head outputs
-        head_outputs = [self_attention_head(x_q, x_kv) for self_attention_head
-                        in self.self_attention_heads]
+        head_outputs = [attention_head(x_q, x_k, x_v) for attention_head
+                        in self.attention_heads]
 
         # vertically concatenate the head outputs
         output = torch.cat(head_outputs, dim=-1)
