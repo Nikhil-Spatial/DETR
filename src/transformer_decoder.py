@@ -1,7 +1,5 @@
-from IPython.core.magic import output_can_be_silenced
-
 from transformer_layers import MultiHeadAttention, FFN
-from configs import D
+from configs import D, DECODER_LAYERS
 from torch import nn
 import torch
 
@@ -50,3 +48,24 @@ class TransformerDecoderLayer(nn.Module):
         object_queries = object_queries + self.ffn(object_queries)
 
         return self.layer_norm_3(object_queries)
+
+class TransformerDecoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # module list of transformer decoder layers
+        self.transformer_decoder_layers = nn.ModuleList(
+            [TransformerDecoderLayer() for _ in range(DECODER_LAYERS)]
+        )
+
+    def forward(self, query_pos, encoder_output, pos_encoding):
+        # initialize object queries/prediction slots to zero
+        object_queries = torch.zeros(N, D)
+
+        # feed object queries to the specific transformer decoder layers
+        for transformer_decoder_layer in self.transformer_decoder_layers:
+            object_queries = transformer_decoder_layer(
+                object_queries, query_pos, encoder_output, pos_encoding
+            )
+
+        return object_queries

@@ -57,7 +57,7 @@ class TransformerEncoder(nn.Module):
     def __init__(self):
         super().__init__()
 
-        # module list of transformer layers
+        # module list of transformer encoder layers
         self.transformer_encoder_layers = nn.ModuleList(
             [TransformerEncoderLayer() for _ in range(ENCODER_LAYERS)]
         )
