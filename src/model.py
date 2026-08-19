@@ -1,6 +1,6 @@
 from torchvision.models import resnet18
 from transformer_encoder_layers import positional_encoding, TransformerEncoder
-from configs import D, H, W, dropout_p, BB_CHANNELS
+from configs import D, H, W, dropout_p, BB_CHANNELS, N
 from torch import nn
 import torch
 
@@ -25,6 +25,9 @@ class Model(nn.Module):
 
         # transformer encoder
         self.transformer_encoder = TransformerEncoder()
+
+        # object queries
+        self.object_queries = nn.Parameter(torch.randn(N, D))
 
     def forward(self, x):
         batch_size = x.shape[0]
