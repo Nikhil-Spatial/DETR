@@ -52,3 +52,26 @@ class SelfAttentionHead(nn.Module):
 
         # compute head output
         return attention_scores @ V
+
+class MultiHeadSelfAttention(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # list of self-attention heads
+        self.self_attention_heads = nn.ModuleList(
+            [SelfAttentionHead() for _ in range(HEADS)]
+        )
+
+        # apply linear transformation to vertically concatenated head outputs
+        self.output_linear_transform = nn.Linear(D, D, bias=False)
+
+    def forward(self, x):
+        # compute head outputs
+        head_outputs = [self_attention_head(x) for self_attention_head
+                        in self.self_attention_heads]
+
+        # vertically concatenate the head outputs
+        output = torch.cat(head_outputs, dim=-1)
+
+        # apply linear transformation
+        return self.output_linear_transform(output)
