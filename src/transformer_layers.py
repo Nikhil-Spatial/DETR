@@ -1,4 +1,4 @@
-from configs import D, H, W, HEADS
+from configs import D, H, W, HEADS, BB_CHANNELS, dropout_p
 import torch.nn.functional as F
 from torch import sin, cos
 from torch import nn
@@ -75,3 +75,19 @@ class MultiHeadSelfAttention(nn.Module):
 
         # apply linear transformation
         return self.output_linear_transform(output)
+
+class FFN(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        self.conv_1 = nn.Conv2d(D, BB_CHANNELS)
+        self.dropout_1 = nn.Dropout(dropout_p)
+
+        self.conv_2 = nn.Conv2d(BB_CHANNELS, D)
+        self.dropout_2 = nn.Dropout(dropout_p)
+
+    def forward(self, x):
+        # convolution -> dropout -> ReLU activation -> convolution -> dropout
+        x = F.relu(self.dropout_1(self.conv_1(x)))
+
+        return self.dropout_2(self.conv_2(x))

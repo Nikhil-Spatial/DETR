@@ -1,6 +1,6 @@
 from torchvision.models import resnet18
 from transformer_layers import positional_encoding
-from configs import D, H, W, dropout_p
+from configs import D, H, W, dropout_p, BB_CHANNELS
 from torch import nn
 import torch
 
@@ -15,7 +15,7 @@ class Model(nn.Module):
         )
 
         # project channels to configured embedded dimensions
-        self.projection = nn.Conv2d(512, D, kernel_size=1)
+        self.projection = nn.Conv2d(BB_CHANNELS, D, kernel_size=1)
 
         # store positional encoding, and register it as a buffer in the
         # model's state dict
