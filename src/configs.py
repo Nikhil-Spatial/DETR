@@ -42,9 +42,10 @@ BATCH_SIZE = 32
 # embedded dimensions
 D = 256
 
-# height/width of feature maps output by backbone
-H = 7
-W = 7
+# height/width of feature maps output by backbone (32 is the resnet
+# down sampling factor)
+H = IMAGE_HEIGHT / 32
+W = IMAGE_WIDTH / 32
 
 # probability of dropout layer
 dropout_p = 0.0

@@ -1,5 +1,5 @@
 from torchvision.models import resnet18
-from transformer_encoder_layers import positional_encoding, TransformerEncoder
+from transformer_encoder import positional_encoding, TransformerEncoder
 from configs import D, H, W, dropout_p, BB_CHANNELS, N
 from torch import nn
 import torch
