@@ -23,9 +23,14 @@ class Model(nn.Module):
     def forward(self, x):
         batch_size = x.shape[0]
 
-        x = self.projection(self.backbone(x))
+        # (B, 3, IMAGE_HEIGHT, IMAGE_WIDTH) -> (B, 512, H, W) -> (B, 256, H, W)
+        x = self.backbone(x)
+        x = self.projection(x)
+
+        # (B, 256, H, W) -> (B, H*W, D)
         x = x.reshape(batch_size, D, H*W).transpose(-2, -1)
         x += self.pos_encodings
+
         return x
 
 inputs = torch.randn(32, 3, 224, 224)
