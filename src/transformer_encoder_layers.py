@@ -91,3 +91,27 @@ class FFN(nn.Module):
         x = F.relu(self.dropout_1(self.conv_1(x)))
 
         return self.dropout_2(self.conv_2(x))
+
+class TransformerEncoderLayer(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+        # layer normalization layers
+        self.layer_norm_1 = nn.LayerNorm(D)
+        self.layer_norm_2 = nn.LayerNorm(D)
+
+        # multi-head self-attention layer
+        self.multi_head_self_attention = MultiHeadSelfAttention()
+
+        # feed-forward network (FFN)
+        self.ffn = FFN()
+
+    def forward(self, x):
+        # multi-head self-attention residual connection -> layer normalize
+        x = self.multi_head_self_attention(x) + x
+        x = self.layer_norm_1(x)
+
+        # ffn residual connection -> layer normalize
+        x = self.ffn(x) + x
+
+        return self.layer_norm_2(x)
