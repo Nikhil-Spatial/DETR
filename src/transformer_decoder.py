@@ -1,5 +1,5 @@
 from transformer_layers import MultiHeadAttention, FFN
-from configs import D, DECODER_LAYERS
+from configs import D, DECODER_LAYERS, N
 from torch import nn
 import torch
 

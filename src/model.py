@@ -1,5 +1,6 @@
 from torchvision.models import resnet18
 from transformer_encoder import positional_encoding, TransformerEncoder
+from transformer_decoder import TransformerDecoder
 from configs import D, H, W, BB_CHANNELS, N
 from torch import nn
 import torch
@@ -28,6 +29,9 @@ class Model(nn.Module):
         # learnable positional object query embeddings
         self.query_pos = nn.Parameter(torch.randn(N, D))
 
+        # transformer decoder
+        self.transformer_decoder = TransformerDecoder()
+
     def forward(self, x):
         batch_size = x.shape[0]
 
@@ -40,6 +44,10 @@ class Model(nn.Module):
 
         # feed feature embeddings to transformer encoder
         x = self.transformer_encoder(x, self.pos_encoding)
+
+        # feed transformer encoder's image representation and positional
+        # encodings/embeddings to the decoder
+        x = self.transformer_decoder(self.query_pos, x, self.pos_encoding)
 
         return x
 
