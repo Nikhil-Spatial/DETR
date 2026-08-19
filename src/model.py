@@ -1,7 +1,7 @@
 from torchvision.models import resnet18
 from transformer_encoder import positional_encoding, TransformerEncoder
 from transformer_decoder import TransformerDecoder
-from configs import D, H, W, BB_CHANNELS, N
+from configs import D, H, W, BB_CHANNELS, N, C
 from torch import nn
 import torch
 
@@ -32,6 +32,10 @@ class Model(nn.Module):
         # transformer decoder
         self.transformer_decoder = TransformerDecoder()
 
+        # classification head: projects D embedded dims to C + 1 dims
+        # the + 1 represents a "no-object" class
+        self.class_head = nn.Linear(D, C+1)
+
     def forward(self, x):
         batch_size = x.shape[0]
 
@@ -49,7 +53,9 @@ class Model(nn.Module):
         # encodings/embeddings to the decoder
         x = self.transformer_decoder(self.query_pos, x, self.pos_encoding)
 
-        return x
+        x_class = self.class_head(x)
+
+        return x_class
 
 inputs = torch.randn(32, 3, 224, 224)
 model = Model()
