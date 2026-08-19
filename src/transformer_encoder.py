@@ -40,11 +40,15 @@ class TransformerEncoderLayer(nn.Module):
         self.ffn = FFN()
 
     def forward(self, x, pos_encoding):
-        # multi-head attention residual connection -> layer normalize
-        x = self.mha(x + pos_encoding, x + pos_encoding, x) + x
+        # 1) multi-head attention residual connection -> layer normalize
+        x = x + self.mha(
+            x_q=(x + pos_encoding),
+            x_k=(x + pos_encoding),
+            x_v =x
+        )
         x = self.layer_norm_1(x)
 
-        # ffn residual connection -> layer normalize
+        # 2) ffn residual connection -> layer normalize
         x = self.ffn(x) + x
 
         return self.layer_norm_2(x)
