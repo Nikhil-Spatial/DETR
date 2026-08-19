@@ -2,7 +2,7 @@ from configs import D, H, W
 from torch import sin, cos
 import torch
 
-def positional_encodings():
+def positional_encoding():
     pos_encodings = torch.empty(H, W, D)
 
     for pos_y in range(H):  # rows
@@ -22,3 +22,4 @@ def positional_encodings():
                 pos_encodings[pos_y][pos_x][(2*i+1)+128] = cos(argument_x)
 
     return pos_encodings.reshape(H*W, D)
+

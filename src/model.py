@@ -1,5 +1,5 @@
 from torchvision.models import resnet18
-from transformer_layers import positional_encodings
+from transformer_layers import positional_encoding
 from configs import D, H, W, dropout_p
 import torch.nn as nn
 import torch
@@ -17,8 +17,10 @@ class Model(nn.Module):
         # project channels to configured embedded dimensions
         self.projection = nn.Conv2d(512, D, kernel_size=1)
 
-        # store positional encodings + add dropout after positional encodings
-        self.pos_encodings = positional_encodings().unsqueeze(0)
+        # store positional encoding, and register it as a buffer in the
+        # model's state dict
+        pos_encoding = positional_encoding().unsqueeze(0)
+        self.register_buffer("pos_encoding", pos_encoding)
         self.dropout = nn.Dropout(dropout_p)
 
     def forward(self, x):
@@ -31,7 +33,8 @@ class Model(nn.Module):
         # (B, 256, H, W) -> (B, H*W, D)
         x = x.reshape(batch_size, D, H*W).transpose(-2, -1)
 
-        x = self.dropout(x + self.pos_encodings)
+        # add positional encoding to feature maps
+        x = self.dropout(x + self.pos_encoding)
 
         return x
 
