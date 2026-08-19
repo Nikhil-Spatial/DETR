@@ -48,7 +48,7 @@ class TransformerEncoderLayer(nn.Module):
         )
         x = self.layer_norm_1(x)
 
-        # 2) ffn residual connection -> layer normalize
+        # 2) FFN + residual connection -> layer normalize
         x = self.ffn(x) + x
 
         return self.layer_norm_2(x)
