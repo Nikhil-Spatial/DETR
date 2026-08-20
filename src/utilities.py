@@ -69,4 +69,4 @@ def GIoU(bbox_1, bbox_2):
     # 5) compute GIoU
     rectangle_area = area(rectangle_coords)
 
-    return IoU - ((rectangle_area - union_area) / rectangle_area)
+    return bbox_IoU - ((rectangle_area - union_area) / rectangle_area)
