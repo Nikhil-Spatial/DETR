@@ -18,24 +18,26 @@ def enclose_coords(bbox_1, bbox_2):
 
     return (x1, y1, x2, y2)
 
-def convert_xywh_coordinates(bbox, draw=False):
+def cxcywh_to_xyxy(bboxes, draw=False):
     # 1) unnormalize (center_x, center_y, width, height)
-    x = bbox[0] * IMAGE_WIDTH
-    y = bbox[1] * IMAGE_HEIGHT
-    w = bbox[2] * IMAGE_WIDTH
-    h = bbox[3] * IMAGE_HEIGHT
+    bboxes[..., [0, 2]] *= IMAGE_WIDTH
+    bboxes[..., [1, 3]] *= IMAGE_HEIGHT
 
     # 2) convert center point to top-left and bottom-right of box coordinates
-    x1 = x - w / 2
-    y1 = y - h / 2
-    x2 = x + w / 2
-    y2 = y + h / 2
+    x, y, w, h = bboxes.unbind(-1)
+
+    xyxy = torch.stack([
+        x - w / 2,
+        y - h / 2,
+        x + w / 2,
+        y + h / 2
+    ], dim=-1)
 
     # 3) if the conversion is for drawing bounding boxes, then round
     if draw:
-        return (int(rd(x1)), int(rd(y1)), int(rd(x2)), int(rd(y2)))
+        return xyxy.round().to(torch.uint8)
 
-    return [x1, y1, x2, y2]
+    return xyxy
 
 def area(bbox):
     w = torch.clamp(bbox[2] - bbox[0], min=0)
