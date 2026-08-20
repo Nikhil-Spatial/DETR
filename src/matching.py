@@ -1,14 +1,22 @@
 import torch.nn.functional as F
+from configs import N
 import torch
 
-def classification_cost():
+def classification_cost(class_preds, truth_labels):
+    class_costs = [
+        -F.softmax(class_preds, dim=-1).select(-1, idx).unsqueeze(-1)
+        for idx in range(truth_labels.shape[0])
+    ]
+
+    return torch.cat(class_costs, dim=-1)
+
+def l1_cost():
     pass
 
-def L1_cost():
+def giou_cost():
     pass
 
-def GIoU_cost():
+def hungarian_match_cost(class_preds, bbox_preds, truth_labels):
     pass
 
-def HungarianMatchingCost():
-    pass
+

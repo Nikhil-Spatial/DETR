@@ -43,7 +43,7 @@ def area(bbox):
 
     return w * h
 
-def IoU(bbox_1, bbox_2):
+def iou(bbox_1, bbox_2):
     # 1) find coordinates of box that intersects both boxes
     intersect_coords = intersection_coords(bbox_1, bbox_2)
 
@@ -53,9 +53,9 @@ def IoU(bbox_1, bbox_2):
     # 3) compute IoU
     return area(intersect_coords) / union_area if union_area != 0 else 0
 
-def GIoU(bbox_1, bbox_2):
+def giou(bbox_1, bbox_2):
     # 1) compute IoU
-    bbox_IoU = IoU(bbox_1, bbox_2)
+    bbox_IoU = iou(bbox_1, bbox_2)
 
     # 2) find coordinates of box that encloses both boxes
     rectangle_coords = enclose_coords(bbox_1, bbox_2)
