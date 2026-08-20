@@ -35,7 +35,7 @@ def convert_xywh_coordinates(bbox, draw=False):
     if draw:
         return (int(rd(x1)), int(rd(y1)), int(rd(x2)), int(rd(y2)))
 
-    return (x1, y1, x2, y2)
+    return [x1, y1, x2, y2]
 
 def area(bbox):
     w = torch.clamp(bbox[2] - bbox[0], min=0)

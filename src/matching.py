@@ -1,4 +1,5 @@
 import torch.nn.functional as F
+from utilities import convert_xywh_coordinates
 from configs import N
 import torch
 
@@ -10,8 +11,10 @@ def classification_cost(class_preds, truth_labels):
 
     return torch.cat(class_costs, dim=-1)
 
-def l1_cost():
-    pass
+def l1_cost(bbox_preds, truth_labels):
+    # compute l1 norms of the vectors containing the distance between
+    l1_costs = [(bbox_preds - truth_labels[i][1:]).abs().sum(-1, True)
+                for i in range(truth_labels.shape[0])]
 
 def giou_cost():
     pass
