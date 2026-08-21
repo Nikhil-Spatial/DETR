@@ -2,25 +2,33 @@ from torch import round as rd
 from src.configs import IMAGE_WIDTH, IMAGE_HEIGHT
 import torch
 
-def intersection_coords(bbox_1, bbox_2):
+def compute_intersection_coords(bbox_1, bbox_2):
     """
     :param bbox_1: a tensor where the last dimension contains 4 bbox values
     :param bbox_2: a 1D tensor of 4 bbox values
     """
-    bbox_1[..., 0] = torch.max(bbox_1[..., 0], bbox_2[0])
-    bbox_1[..., 1] = torch.max(bbox_1[..., 1], bbox_2[1])
-    bbox_1[..., 2] = torch.min(bbox_1[..., 2], bbox_2[2])
-    bbox_1[..., 3] = torch.min(bbox_1[..., 3], bbox_2[3])
+    intersect_boxes = torch.empty(bbox_1.shape[0], 4)
 
-def enclose_coords(bbox_1, bbox_2):
+    intersect_boxes[..., 0] = torch.max(bbox_1[..., 0], bbox_2[0])
+    intersect_boxes[..., 1] = torch.max(bbox_1[..., 1], bbox_2[1])
+    intersect_boxes[..., 2] = torch.min(bbox_1[..., 2], bbox_2[2])
+    intersect_boxes[..., 3] = torch.min(bbox_1[..., 3], bbox_2[3])
+
+    return intersect_boxes
+
+def compute_enclosed_coords(bbox_1, bbox_2):
     """
     :param bbox_1: a tensor where the last dimension contains 4 bbox values
     :param bbox_2: a 1D tensor of 4 bbox values
     """
-    bbox_1[..., 0] = torch.min(bbox_1[..., 0], bbox_2[0])
-    bbox_1[..., 1] = torch.min(bbox_1[..., 1], bbox_2[1])
-    bbox_1[..., 2] = torch.max(bbox_1[..., 2], bbox_2[2])
-    bbox_1[..., 3] = torch.max(bbox_1[..., 3], bbox_2[3])
+    enclosed_boxes = torch.empty(bbox_1.shape[0], 4)
+
+    enclosed_boxes[..., 0] = torch.min(bbox_1[..., 0], bbox_2[0])
+    enclosed_boxes[..., 1] = torch.min(bbox_1[..., 1], bbox_2[1])
+    enclosed_boxes[..., 2] = torch.max(bbox_1[..., 2], bbox_2[2])
+    enclosed_boxes[..., 3] = torch.max(bbox_1[..., 3], bbox_2[3])
+
+    return enclosed_boxes
 
 def cxcywh_to_xyxy(bboxes, draw=False):
     # 1) unnormalize (center_x, center_y, width, height)
@@ -50,9 +58,12 @@ def area(bbox):
 
     return w * h
 
-def iou(bbox_1, bbox_2):
+def compute_iou(bbox_1, bbox_2):
     # 1) find coordinates of box that intersects both boxes
-    intersect_coords = intersection_coords(bbox_1, bbox_2)
+    intersection_coords(bbox_1, bbox_2)
+
+    # 2) compute area of intersecting box
+    intersection_area = area(bbox)
 
     # 2) compute union
     union_area = area(bbox_1) + area(bbox_2) - area(intersect_coords)
@@ -60,7 +71,22 @@ def iou(bbox_1, bbox_2):
     # 3) compute IoU
     return area(intersect_coords) / union_area if union_area != 0 else 0
 
-def giou(bbox_1, bbox_2):
+def compute_giou(bbox_1, bbox_2):
+    """
+    :param bbox_1: tensor of shape (100, 4), the last dim's 4 values are bbox
+    predictions
+    :param bbox_2: tensor of shape (?, 4), the last dim's 4 values are bbox
+    ground truth labels
+    """
+    gious = []
+
+    for i in range(bbox_2.shape[0]):
+        preds_clone = bbox_1.clone().detach()
+
+        # 1) compute IoU
+        iou = compute_iou(preds_clone, bbox_2[i])
+
+
     # 1) compute IoU
     bbox_IoU = iou(bbox_1, bbox_2)
 
