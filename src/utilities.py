@@ -3,10 +3,6 @@ from src.configs import IMAGE_WIDTH, IMAGE_HEIGHT
 import torch
 
 def compute_intersection_coords(bbox_1, bbox_2):
-    """
-    :param bbox_1: a tensor where the last dimension contains 4 bbox values
-    :param bbox_2: a 1D tensor of 4 bbox values
-    """
     intersect_boxes = torch.empty(bbox_1.shape[0], 4)
 
     intersect_boxes[..., 0] = torch.max(bbox_1[..., 0], bbox_2[0])
@@ -17,10 +13,6 @@ def compute_intersection_coords(bbox_1, bbox_2):
     return intersect_boxes
 
 def compute_enclosed_coords(bbox_1, bbox_2):
-    """
-    :param bbox_1: a tensor where the last dimension contains 4 bbox values
-    :param bbox_2: a 1D tensor of 4 bbox values
-    """
     enclosed_boxes = torch.empty(bbox_1.shape[0], 4)
 
     enclosed_boxes[..., 0] = torch.min(bbox_1[..., 0], bbox_2[0])
@@ -59,12 +51,6 @@ def compute_area(bbox):
     return w * h
 
 def compute_giou(bbox_1, bbox_2):
-    """
-    :param bbox_1: tensor of shape (100, 4), the last dim's 4 values are bbox
-    predictions
-    :param bbox_2: tensor of shape (?, 4), the last dim's 4 values are bbox
-    ground truth labels
-    """
     giou_costs = []
 
     for i in range(bbox_2.shape[0]):
