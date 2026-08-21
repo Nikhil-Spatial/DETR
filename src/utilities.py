@@ -40,8 +40,9 @@ def cxcywh_to_xyxy(bboxes, draw=False):
     return xyxy
 
 def area(bbox):
-    w = torch.clamp(bbox[2] - bbox[0], min=0)
-    h = torch.clamp(bbox[3] - bbox[1], min=0)
+    # compute area for one bbox or a tensor full of them
+    w = torch.clamp(bbox[..., 2] - bbox[..., 0], min=0)
+    h = torch.clamp(bbox[..., 3] - bbox[..., 1], min=0)
 
     return w * h
 

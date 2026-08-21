@@ -1,4 +1,5 @@
 import torch.nn.functional as F
+from src.utilities import giou
 from src.configs import N
 import torch
 
@@ -18,7 +19,7 @@ def l1_cost(bbox_preds, truth_boxes):
 
     return torch.cat(l1_costs, dim=-1)
 
-def giou_cost():
+def giou_cost(bbox_preds, truth_boxes):
     pass
 
 def hungarian_match_cost(class_preds, bbox_preds, truth_labels):
