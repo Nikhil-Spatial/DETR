@@ -71,7 +71,7 @@ def compute_giou(bbox_1, bbox_2):
                       - compute_area(intersection_coords))
 
         # 4) compute IoU
-        iou = intersection_area / union_area if union_area > 0 else 0
+        iou = intersection_area / union_area
 
         # 5) compute GIoU
         giou_costs.append(
