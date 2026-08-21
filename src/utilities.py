@@ -51,25 +51,12 @@ def cxcywh_to_xyxy(bboxes, draw=False):
 
     return xyxy
 
-def area(bbox):
+def compute_area(bbox):
     # compute area for one bbox or a tensor full of them
     w = torch.clamp(bbox[..., 2] - bbox[..., 0], min=0)
     h = torch.clamp(bbox[..., 3] - bbox[..., 1], min=0)
 
     return w * h
-
-def compute_iou(bbox_1, bbox_2):
-    # 1) find coordinates of box that intersects both boxes
-    intersection_coords(bbox_1, bbox_2)
-
-    # 2) compute area of intersecting box
-    intersection_area = area(bbox)
-
-    # 2) compute union
-    union_area = area(bbox_1) + area(bbox_2) - area(intersect_coords)
-
-    # 3) compute IoU
-    return area(intersect_coords) / union_area if union_area != 0 else 0
 
 def compute_giou(bbox_1, bbox_2):
     """
@@ -78,28 +65,31 @@ def compute_giou(bbox_1, bbox_2):
     :param bbox_2: tensor of shape (?, 4), the last dim's 4 values are bbox
     ground truth labels
     """
-    gious = []
+    giou_costs = []
 
     for i in range(bbox_2.shape[0]):
-        preds_clone = bbox_1.clone().detach()
+        # 1) find coordinates of box that encloses both boxes, and compute its
+        # area
+        rectangle_coords = enclose_coords(bbox_1, bbox_2[i])
+        rectangle_area = compute_area(rectangle_coords)
 
-        # 1) compute IoU
-        iou = compute_iou(preds_clone, bbox_2[i])
+        # 2) find coordinates of box that intersects both boxes, and compute
+        # its area
+        intersection_coords = compute_intersection_coords(
+            bbox_1, bbox_2[i]
+        )
+        intersection_area = compute_area(intersection_coords)
 
+        # 3) compute union
+        union_area = (compute_area(bbox_1) + compute_area(bbox_2[i])
+                      - compute_area(intersection_coords))
 
-    # 1) compute IoU
-    bbox_IoU = iou(bbox_1, bbox_2)
+        # 4) compute IoU
+        iou = intersection_area / union_area if union_area > 0 else 0
 
-    # 2) find coordinates of box that encloses both boxes
-    rectangle_coords = enclose_coords(bbox_1, bbox_2)
+        # 5) compute GIoU
+        giou_costs.append(
+            iou - ((rectangle_area - union_area) / rectangle_area)
+        )
 
-    # 3) find coordinates of box that intersects both boxes
-    intersect_coords = intersection_coords(bbox_1, bbox_2)
-
-    # 4) compute union
-    union_area = area(bbox_1) + area(bbox_2) - area(intersect_coords)
-
-    # 5) compute GIoU
-    rectangle_area = area(rectangle_coords)
-
-    return bbox_IoU - ((rectangle_area - union_area) / rectangle_area)
+    return torch.cat(giou_costs, dim=-1)
