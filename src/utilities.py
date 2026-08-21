@@ -56,7 +56,7 @@ def compute_giou(bbox_1, bbox_2):
     for i in range(bbox_2.shape[0]):
         # 1) find coordinates of box that encloses both boxes, and compute its
         # area
-        rectangle_coords = enclose_coords(bbox_1, bbox_2[i])
+        rectangle_coords = compute_enclosed_coords(bbox_1, bbox_2[i])
         rectangle_area = compute_area(rectangle_coords)
 
         # 2) find coordinates of box that intersects both boxes, and compute
