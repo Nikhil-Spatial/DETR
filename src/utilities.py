@@ -3,20 +3,24 @@ from src.configs import IMAGE_WIDTH, IMAGE_HEIGHT
 import torch
 
 def intersection_coords(bbox_1, bbox_2):
-    x1 = torch.max(bbox_1[0], bbox_2[0])
-    y1 = torch.max(bbox_1[1], bbox_2[1])
-    x2 = torch.min(bbox_1[2], bbox_2[2])
-    y2 = torch.min(bbox_1[3], bbox_2[3])
-
-    return (x1, y1, x2, y2)
+    """
+    :param bbox_1: a tensor where the last dimension contains 4 bbox values
+    :param bbox_2: a 1D tensor of 4 bbox values
+    """
+    bbox_1[..., 0] = torch.max(bbox_1[..., 0], bbox_2[0])
+    bbox_1[..., 1] = torch.max(bbox_1[..., 1], bbox_2[1])
+    bbox_1[..., 2] = torch.min(bbox_1[..., 2], bbox_2[2])
+    bbox_1[..., 3] = torch.min(bbox_1[..., 3], bbox_2[3])
 
 def enclose_coords(bbox_1, bbox_2):
-    x1 = torch.min(bbox_1[0], bbox_2[0])
-    y1 = torch.min(bbox_1[1], bbox_2[1])
-    x2 = torch.max(bbox_1[2], bbox_2[2])
-    y2 = torch.max(bbox_1[3], bbox_2[3])
-
-    return (x1, y1, x2, y2)
+    """
+    :param bbox_1: a tensor where the last dimension contains 4 bbox values
+    :param bbox_2: a 1D tensor of 4 bbox values
+    """
+    bbox_1[..., 0] = torch.min(bbox_1[..., 0], bbox_2[0])
+    bbox_1[..., 1] = torch.min(bbox_1[..., 1], bbox_2[1])
+    bbox_1[..., 2] = torch.max(bbox_1[..., 2], bbox_2[2])
+    bbox_1[..., 3] = torch.max(bbox_1[..., 3], bbox_2[3])
 
 def cxcywh_to_xyxy(bboxes, draw=False):
     # 1) unnormalize (center_x, center_y, width, height)
