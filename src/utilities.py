@@ -3,11 +3,7 @@ from src.configs import IMAGE_WIDTH, IMAGE_HEIGHT
 import torch
 
 def cxcywh_to_xyxy(bboxes, draw=False):
-    # 1) unnormalize (center_x, center_y, width, height)
-    bboxes[..., [0, 2]] *= IMAGE_WIDTH
-    bboxes[..., [1, 3]] *= IMAGE_HEIGHT
-
-    # 2) convert center point to top-left and bottom-right of box coordinates
+    # convert center point to top-left and bottom-right of box coordinates
     x, y, w, h = bboxes.unbind(-1)
 
     xyxy = torch.stack([
@@ -17,7 +13,7 @@ def cxcywh_to_xyxy(bboxes, draw=False):
         y + h / 2
     ], dim=-1)
 
-    # 3) if the conversion is for drawing bounding boxes, then round
+    # if the conversion is for drawing bounding boxes, then round
     if draw:
         return xyxy.round().to(torch.uint8)
 
@@ -45,8 +41,12 @@ def compute_giou(bbox_1, bbox_2):
 
     intersection = compute_area(intersection_coords)
 
+    print(intersection)
+
     # 2) compute union
     union_ = compute_area(bbox_1) + compute_area(bbox_2) - intersection
+
+    print(union_)
 
     # 3) compute area of rectangle that encloses both bboxes
     rect_x1 = torch.min(bbox_1[:, None, 0], bbox_2[None, :, 0])
@@ -62,6 +62,8 @@ def compute_giou(bbox_1, bbox_2):
     ], dim=-1)
 
     rectangle_area = compute_area(rectangle_coords)
+
+    print(rectangle_area)
 
     # compute GIoU and return
     return (intersection / union_) - ((rectangle_area - union_) /
