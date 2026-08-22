@@ -45,12 +45,8 @@ def compute_giou(bbox_1, bbox_2):
 
     intersection = compute_area(intersection_coords)
 
-    print(intersection)
-
     # 3) compute union
     union_ = compute_area(bbox_1) + compute_area(bbox_2) - intersection
-
-    print(union_)
 
     # 4) compute area of rectangle that encloses both bboxes
     rect_x1 = torch.min(bbox_1[:, None, 0], bbox_2[None, :, 0])
@@ -66,8 +62,6 @@ def compute_giou(bbox_1, bbox_2):
     ], dim=-1)
 
     rectangle_area = compute_area(rectangle_coords)
-
-    print(rectangle_area)
 
     # 5) compute GIoU and return
     return (intersection / union_) - ((rectangle_area - union_) /
