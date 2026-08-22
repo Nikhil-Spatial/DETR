@@ -46,8 +46,8 @@ def compute_giou(bbox_1, bbox_2):
     intersection = compute_area(intersection_coords)
 
     # 3) compute union
-    union_ = (compute_area(bbox_1)[:, None, :] +
-              compute_area(bbox_2)[None, :, :] -
+    union_ = (compute_area(bbox_1)[:, None] +
+              compute_area(bbox_2)[None, :] -
               intersection)
 
     # 4) compute area of rectangle that encloses both bboxes
