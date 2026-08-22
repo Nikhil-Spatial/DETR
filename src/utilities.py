@@ -36,11 +36,11 @@ def compute_giou(bbox_1, bbox_2):
     inter_x2 = torch.min(bbox_1[:, None, 2], bbox_2[None, :, 2])
     inter_y2 = torch.min(bbox_1[:, None, 3], bbox_2[None, :, 3])
 
-    intersection_coords = torch.cat([
-        inter_x1[:, :, None],
-        inter_y1[:, :, None],
-        inter_x2[:, :, None],
-        inter_y2[:, :, None]
+    intersection_coords = torch.stack([
+        inter_x1,
+        inter_y1,
+        inter_x2,
+        inter_y2
     ], dim=-1)
 
     intersection = compute_area(intersection_coords)
@@ -56,11 +56,11 @@ def compute_giou(bbox_1, bbox_2):
     rect_x2 = torch.max(bbox_1[:, None, 2], bbox_2[None, :, 2])
     rect_y2 = torch.max(bbox_1[:, None, 3], bbox_2[None, :, 3])
 
-    rectangle_coords = torch.cat([
-        rect_x1[:, :, None],
-        rect_y1[:, :, None],
-        rect_x2[:, :, None],
-        rect_y2[:, :, None]
+    rectangle_coords = torch.stack([
+        rect_x1,
+        rect_y1,
+        rect_x2,
+        rect_y2
     ], dim=-1)
 
     rectangle_area = compute_area(rectangle_coords)
