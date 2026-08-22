@@ -1,5 +1,3 @@
-from torch import round as rd
-from src.configs import IMAGE_WIDTH, IMAGE_HEIGHT
 import torch
 
 def cxcywh_to_xyxy(bboxes, draw=False):
@@ -25,16 +23,16 @@ def compute_area(bbox):
 
     return w * h
 
-def compute_giou(bbox_1, bbox_2):
+def pairwise_giou_cxcywh(boxes_1, boxes_2):
     # 1) convert (cx, cy, w, h) to (x1, y1, x2, y2)
-    bbox_1 = cxcywh_to_xyxy(bbox_1)
-    bbox_2 = cxcywh_to_xyxy(bbox_2)
+    boxes_1 = cxcywh_to_xyxy(boxes_1)
+    boxes_2 = cxcywh_to_xyxy(boxes_2)
 
     # 2) find intersection coords, and compute area of intersection box
-    inter_x1 = torch.max(bbox_1[:, None, 0], bbox_2[None, :, 0])
-    inter_y1 = torch.max(bbox_1[:, None, 1], bbox_2[None, :, 1])
-    inter_x2 = torch.min(bbox_1[:, None, 2], bbox_2[None, :, 2])
-    inter_y2 = torch.min(bbox_1[:, None, 3], bbox_2[None, :, 3])
+    inter_x1 = torch.max(boxes_1[:, None, 0], boxes_2[None, :, 0])
+    inter_y1 = torch.max(boxes_1[:, None, 1], boxes_2[None, :, 1])
+    inter_x2 = torch.min(boxes_1[:, None, 2], boxes_2[None, :, 2])
+    inter_y2 = torch.min(boxes_1[:, None, 3], boxes_2[None, :, 3])
 
     intersection_coords = torch.stack([
         inter_x1,
@@ -46,15 +44,15 @@ def compute_giou(bbox_1, bbox_2):
     intersection = compute_area(intersection_coords)
 
     # 3) compute union
-    union_ = (compute_area(bbox_1)[:, None] +
-              compute_area(bbox_2)[None, :] -
+    union_ = (compute_area(boxes_1)[:, None] +
+              compute_area(boxes_2)[None, :] -
               intersection)
 
     # 4) compute area of rectangle that encloses both bboxes
-    rect_x1 = torch.min(bbox_1[:, None, 0], bbox_2[None, :, 0])
-    rect_y1 = torch.min(bbox_1[:, None, 1], bbox_2[None, :, 1])
-    rect_x2 = torch.max(bbox_1[:, None, 2], bbox_2[None, :, 2])
-    rect_y2 = torch.max(bbox_1[:, None, 3], bbox_2[None, :, 3])
+    rect_x1 = torch.min(boxes_1[:, None, 0], boxes_2[None, :, 0])
+    rect_y1 = torch.min(boxes_1[:, None, 1], boxes_2[None, :, 1])
+    rect_x2 = torch.max(boxes_1[:, None, 2], boxes_2[None, :, 2])
+    rect_y2 = torch.max(boxes_1[:, None, 3], boxes_2[None, :, 3])
 
     rectangle_coords = torch.stack([
         rect_x1,
