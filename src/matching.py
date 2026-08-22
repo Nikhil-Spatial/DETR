@@ -1,5 +1,5 @@
 import torch.nn.functional as F
-from src.utilities import giou
+from src.utilities import compute_giou
 from src.configs import N
 import torch
 

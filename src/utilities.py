@@ -20,8 +20,8 @@ def cxcywh_to_xyxy(bboxes, draw=False):
     return xyxy
 
 def compute_area(bbox):
-    w = (bbox[..., 2] - bbox[..., 0]).clamp(min=1e-7)
-    h = (bbox[..., 3] - bbox[..., 1]).clamp(min=1e-7)
+    w = (bbox[..., 2] - bbox[..., 0]).clamp(min=0)
+    h = (bbox[..., 3] - bbox[..., 1]).clamp(min=0)
 
     return w * h
 
@@ -46,7 +46,9 @@ def compute_giou(bbox_1, bbox_2):
     intersection = compute_area(intersection_coords)
 
     # 3) compute union
-    union_ = compute_area(bbox_1) + compute_area(bbox_2) - intersection
+    union_ = (compute_area(bbox_1)[:, None, :] +
+              compute_area(bbox_2)[None, :, :] -
+              intersection)
 
     # 4) compute area of rectangle that encloses both bboxes
     rect_x1 = torch.min(bbox_1[:, None, 0], bbox_2[None, :, 0])
@@ -64,5 +66,5 @@ def compute_giou(bbox_1, bbox_2):
     rectangle_area = compute_area(rectangle_coords)
 
     # 5) compute GIoU and return
-    return (intersection / union_) - ((rectangle_area - union_) /
-                                      rectangle_area)
+    return ((intersection / union_.clamp(min=1e-7)) -
+            ((rectangle_area - union_) / rectangle_area.clamp(min=1e-7)))
