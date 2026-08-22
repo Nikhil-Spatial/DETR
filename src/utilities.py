@@ -26,7 +26,11 @@ def compute_area(bbox):
     return w * h
 
 def compute_giou(bbox_1, bbox_2):
-    # 1) find intersection coords, and compute area of intersection box
+    # 1) convert (cx, cy, w, h) to (x1, y1, x2, y2)
+    bbox_1 = cxcywh_to_xyxy(bbox_1)
+    bbox_2 = cxcywh_to_xyxy(bbox_2)
+
+    # 2) find intersection coords, and compute area of intersection box
     inter_x1 = torch.max(bbox_1[:, None, 0], bbox_2[None, :, 0])
     inter_y1 = torch.max(bbox_1[:, None, 1], bbox_2[None, :, 1])
     inter_x2 = torch.min(bbox_1[:, None, 2], bbox_2[None, :, 2])
@@ -43,12 +47,12 @@ def compute_giou(bbox_1, bbox_2):
 
     print(intersection)
 
-    # 2) compute union
+    # 3) compute union
     union_ = compute_area(bbox_1) + compute_area(bbox_2) - intersection
 
     print(union_)
 
-    # 3) compute area of rectangle that encloses both bboxes
+    # 4) compute area of rectangle that encloses both bboxes
     rect_x1 = torch.min(bbox_1[:, None, 0], bbox_2[None, :, 0])
     rect_y1 = torch.min(bbox_1[:, None, 1], bbox_2[None, :, 1])
     rect_x2 = torch.max(bbox_1[:, None, 2], bbox_2[None, :, 2])
@@ -65,6 +69,6 @@ def compute_giou(bbox_1, bbox_2):
 
     print(rectangle_area)
 
-    # compute GIoU and return
+    # 5) compute GIoU and return
     return (intersection / union_) - ((rectangle_area - union_) /
                                       rectangle_area)
