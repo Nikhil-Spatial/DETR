@@ -31,8 +31,10 @@ def hungarian_match_costs(class_preds, bbox_preds, truth_labels):
     # last dimension is only ground truth boxes of (cx, cy, w, h)
     truth_boxes = truth_labels[..., -4:]
 
+    # compute costs
     cls_cost = compute_cls_cost(class_preds, truth_classes)
     l1_cost = compute_l1_cost(bbox_preds, truth_boxes)
     giou_cost = compute_giou_cost(bbox_preds, truth_boxes)
 
+    # combine costs scaled by their respective hyperparameters
     return LAMBDA_CLS*cls_cost + LAMBDA_L1*l1_cost + LAMBDA_GIOU*giou_cost
