@@ -24,7 +24,7 @@ def compute_giou_cost(bbox_preds, truth_boxes):
     # negate the giou
     return -pairwise_giou_cxcywh(bbox_preds, truth_boxes)
 
-def hungarian_match_cost(class_preds, bbox_preds, truth_labels):
+def hungarian_match_costs(class_preds, bbox_preds, truth_labels):
     # last dimension is only ground truth class labels
     truth_classes = truth_labels[..., 0]
 
