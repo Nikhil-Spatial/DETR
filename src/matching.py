@@ -4,6 +4,7 @@ from src.configs import N
 import torch
 
 def classification_cost(class_preds, truth_labels):
+    # negate the correct class probabilities
     class_costs = [
         -F.softmax(class_preds, dim=-1).select(-1, int(idx)).unsqueeze(-1)
         for idx in truth_labels
@@ -20,7 +21,8 @@ def l1_cost(bbox_preds, truth_boxes):
     return torch.cat(l1_costs, dim=-1)
 
 def giou_cost(bbox_preds, truth_boxes):
-    return pairwise_giou_cxcywh(bbox_preds, truth_boxes)
+    # negate the giou
+    return -pairwise_giou_cxcywh(bbox_preds, truth_boxes)
 
 def hungarian_match_cost(class_preds, bbox_preds, truth_labels):
 
