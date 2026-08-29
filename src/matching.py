@@ -3,29 +3,36 @@ from src.utilities import pairwise_giou_cxcywh
 from src.configs import N
 import torch
 
-def classification_cost(class_preds, truth_labels):
+def compute_cls_cost(class_preds, truth_classes):
     # negate the correct class probabilities
     class_costs = [
         -F.softmax(class_preds, dim=-1).select(-1, int(idx)).unsqueeze(-1)
-        for idx in truth_labels
+        for idx in truth_classes
     ]
 
     return torch.cat(class_costs, dim=-1)
 
-def l1_cost(bbox_preds, truth_boxes):
+def compute_l1_cost(bbox_preds, truth_boxes):
     # compute l1 norms of the vectors containing the distance between center
     # points
-    l1_costs = [(bbox_preds - truth_boxes[i][:]).abs().sum(-1, True)
+    l1_costs = [(bbox_preds - truth_boxes[i]).abs().sum(-1, True)
                 for i in range(truth_boxes.shape[0])]
 
     return torch.cat(l1_costs, dim=-1)
 
-def giou_cost(bbox_preds, truth_boxes):
+def compute_giou_cost(bbox_preds, truth_boxes):
     # negate the giou
     return -pairwise_giou_cxcywh(bbox_preds, truth_boxes)
 
 def hungarian_match_cost(class_preds, bbox_preds, truth_labels):
+    # last dimension is only ground truth class labels
+    truth_classes = truth_labels[..., 0]
 
-    cls_cost = classification_cost(class_preds, truth_labels[:, 0])
+    # last dimension is only ground truth boxes of (cx, cy, w, h)
+    truth_boxes = truth_labels[..., -4:]
+
+    cls_cost = compute_cls_cost(class_preds, truth_classes)
+    l1_cost = compute_l1_cost(bbox_preds, truth_boxes)
+    giou_cost = compute_giou_cost(bbox_preds, truth_boxes)
 
 
