@@ -1,6 +1,6 @@
 import torch.nn.functional as F
 from src.utilities import pairwise_giou_cxcywh
-from src.configs import N
+from src.configs import LAMBDA_CLS, LAMBDA_L1,  LAMBDA_GIOU
 import torch
 
 def compute_cls_cost(class_preds, truth_classes):
@@ -35,4 +35,4 @@ def hungarian_match_cost(class_preds, bbox_preds, truth_labels):
     l1_cost = compute_l1_cost(bbox_preds, truth_boxes)
     giou_cost = compute_giou_cost(bbox_preds, truth_boxes)
 
-
+    return LAMBDA_CLS*cls_cost + LAMBDA_L1*l1_cost + LAMBDA_GIOU*giou_cost

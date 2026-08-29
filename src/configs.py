@@ -64,3 +64,8 @@ DECODER_LAYERS = 6
 
 # number of object queries/prediction slots
 N = 100
+
+# hungarian cost/loss hyperparameters
+LAMBDA_CLS = 1.0
+LAMBDA_L1 = 5.0
+LAMBDA_GIOU = 2.0
