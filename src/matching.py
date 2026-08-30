@@ -1,6 +1,7 @@
 import torch.nn.functional as F
 from src.utilities import pairwise_giou_cxcywh
 from src.configs import LAMBDA_CLS, LAMBDA_L1,  LAMBDA_GIOU
+from scipy.optimize import linear_sum_assignment
 import torch
 
 def compute_cls_cost(class_preds, truth_classes):
@@ -38,3 +39,14 @@ def hungarian_match_costs(class_preds, bbox_preds, truth_labels):
 
     # combine costs scaled by their respective hyperparameters
     return LAMBDA_CLS*cls_cost + LAMBDA_L1*l1_cost + LAMBDA_GIOU*giou_cost
+
+def hungarian_matching(class_preds, bbox_preds, truth_labels):
+    # each position represents the cost of an object query's prediction with
+    # a ground truth label
+    cost_matrix = hungarian_match_costs(class_preds, bbox_preds, truth_labels)
+
+    # one-to-one matching with minimum total cost
+    pred_idxs, gt_idxs = linear_sum_assignment(cost)
+
+
+
