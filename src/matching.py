@@ -40,17 +40,17 @@ def hungarian_match_costs(class_preds, bbox_preds, gt_labels):
     # combine costs scaled by their respective hyperparameters
     return LAMBDA_CLS*cls_cost + LAMBDA_L1*l1_cost + LAMBDA_GIOU*giou_cost
 
-def hungarian_matching(class_preds, bbox_preds, truth_labels):
+def hungarian_matching(class_preds, bbox_preds, gt_labels):
     # each position represents the cost of an object query's prediction with
     # a ground truth label
-    cost_matrix = hungarian_match_costs(class_preds, bbox_preds, truth_labels)
+    cost_matrix = hungarian_match_costs(class_preds, bbox_preds, gt_labels)
 
     # one-to-one matching with minimum total cost
-    pred_idxs, gt_idxs = linear_sum_assignment(cost)
+    pred_idxs, gt_idxs = linear_sum_assignment(cost_matrix)
 
     # create N-dim vector to represent all target matches, initializing each
     # object query's match with no_object class (idx C)
-    target_matches = torch.full((N,), C)
+    target_matches = torch.full((N,), float(C))
 
     # match object query's with their class idx
     target_matches[pred_idxs] = gt_labels[gt_idxs, 0]
